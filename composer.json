@@ -1,0 +1,18 @@
+{
+  "name": "leovie/cronjob-validator",
+  "authors": [
+    {
+      "name": "Leo Viezens",
+      "role": "Developer"
+    }
+  ],
+  "config": {
+    "bin-dir": "bin",
+    "sort-packages": true
+  },
+  "require-dev": {
+    "infection/infection": "^0.13.6",
+    "phpstan/phpstan-shim": "^0.11.16",
+    "phpunit/phpunit": "^8.3"
+  }
+}
