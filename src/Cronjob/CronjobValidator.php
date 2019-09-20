@@ -2,29 +2,24 @@
 
 namespace LeoVie\CronjobValidator\Cronjob;
 
-use Symfony\Component\Console\Output\OutputInterface;
+use LeoVie\CronjobValidator\Exception\InvalidCronjobException;
 
 class CronjobValidator
 {
-    private const SPECIAL_KEYWORD_PATTERN = '%^@(reboot|daily|midnight|hourly|weekly|monthly|annually|yearly).+%m';
+    private const SPECIAL_KEYWORD_PATTERN = '%^@(reboot|daily|midnight|hourly|weekly|monthly|annually|yearly).+$%m';
     private const MINUTE_PATTERN = '%^(\\*|\/?0?([0-9]|[1-4][0-9]|5[0-9]))$%m';
     private const HOUR_PATTERN = '%^(\\*|\/?0*([0-9]|1[0-9]|2[0-3]))$%m';
     private const DAY_PATTERN = '%^(\\*|\/?0*([1-9]|[12][0-9]|3[01]))$%m';
     private const MONTH_PATTERN = '%^(\\*|\/?0*([1-9]|1[0-2]))$%m';
     private const WEEKDAY_PATTERN = '%^(\\*|\/?0*([0-7]))$%m';
 
-    /** @var OutputInterface */
-    private $output;
-
-    public function __construct(OutputInterface $output)
-    {
-        $this->output = $output;
-    }
-
-    public function cronjobFormatIsValid(string $cronjob): bool
+    /**
+     * @throws InvalidCronjobException
+     */
+    public function validateCronjob(string $cronjob): void
     {
         if (preg_match(self::SPECIAL_KEYWORD_PATTERN, $cronjob)) {
-            return true;
+            return;
         }
 
         $partsPatterns = [
@@ -37,16 +32,12 @@ class CronjobValidator
         $parts = explode(' ', $cronjob);
         foreach ($partsPatterns as $i => $pattern) {
             if (!(key_exists($i, $parts))) {
-                $this->output->writeln("Cronjob '$cronjob' is invalid (too few time items).");
-                return false;
+                throw new InvalidCronjobException($cronjob, 'Too few time items');
             }
             $part = $parts[$i];
             if (!preg_match($pattern, $part)) {
-                $this->output->writeln("Cronjob '$cronjob' is invalid (at position $i ('$part')).");
-                return false;
+                throw new InvalidCronjobException($cronjob, "At position $i ('$part')");
             }
         }
-
-        return true;
     }
 }

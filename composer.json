@@ -26,5 +26,7 @@
     "phpstan/phpstan-phpunit": "^0.11.2",
     "phpstan/phpstan-shim": "^0.11.16",
     "phpunit/phpunit": "^8.3"
+  },
+  "require": {
   }
 }

@@ -3,8 +3,8 @@
 namespace LeoVie\CronjobValidator\Test\Unit\Cronjob;
 
 use LeoVie\CronjobValidator\Cronjob\CronjobValidator;
+use LeoVie\CronjobValidator\Exception\InvalidCronjobException;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class CronjobValidatorTest extends TestCase
 {
@@ -13,31 +13,34 @@ class CronjobValidatorTest extends TestCase
 
     public function setUp(): void
     {
-        $output = $this->createMock(OutputInterface::class);
-        $this->cronjobValidator = new CronjobValidator($output);
+        $this->cronjobValidator = new CronjobValidator();
     }
 
     /** @dataProvider cronjobFormatIsValid_provider */
-    public function test_cronjobFormatIsValid_returnsExpected(string $cronjob, bool $expected): void
+    public function test_cronjobFormatIsValid_throwsIfInvalid(string $cronjob, bool $shouldThrow): void
     {
-        $actual = $this->cronjobValidator->cronjobFormatIsValid($cronjob);
+        if ($shouldThrow) {
+            self::expectException(InvalidCronjobException::class);
+        } else {
+            self::expectNotToPerformAssertions();
+        }
 
-        self::assertEquals($expected, $actual);
+        $this->cronjobValidator->validateCronjob($cronjob);
     }
 
     public function cronjobFormatIsValid_provider(): array
     {
         return [
-            ['@daily curl http://localhost', true],
-            ['* * * * * curl http://localhost', true],
-            ['/15 * * * * curl http://localhost', true],
-            ['/15 * * * 7 curl http://localhost', true],
-            ['* * * * curl http://localhost', false],
-            ['60 * * * * curl http://localhost', false],
-            ['* 24 * * * curl http://localhost', false],
-            ['* * 32 * * curl http://localhost', false],
-            ['* * * 13 * curl http://localhost', false],
-            ['* * * * 8 curl http://localhost', false],
+            ['@daily curl http://localhost', false],
+            ['* * * * * curl http://localhost', false],
+            ['/15 * * * * curl http://localhost', false],
+            ['/15 * * * 7 curl http://localhost', false],
+            ['* * * * curl http://localhost', true],
+            ['60 * * * * curl http://localhost', true],
+            ['* 24 * * * curl http://localhost', true],
+            ['* * 32 * * curl http://localhost', true],
+            ['* * * 13 * curl http://localhost', true],
+            ['* * * * 8 curl http://localhost', true],
         ];
     }
 }
